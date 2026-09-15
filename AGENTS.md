@@ -39,3 +39,18 @@ This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin con
 - Use double quotes for strings containing apostrophes (`"We're here to help"`), or escape them in single-quoted strings. An unescaped apostrophe in a single-quoted string breaks the build.
 - Ensure JSX tags are closed and braces are balanced.
 - Export components as default exports.
+
+## Showcase content
+
+All student work and class activities live in `src/data/showcase.ts`. The nav,
+sections, project counts and search all derive from the `ACTIVITIES` array, so
+adding an assignment or a student never requires touching `src/App.tsx`.
+
+Project thumbnails are screenshots captured by `scripts/thumbs.sh` (headless
+Chrome + `sips`) into `public/thumbs/<host-slug>.jpg`. After adding entries:
+
+    ./scripts/thumbs.sh            # captures only the missing ones
+    ./scripts/thumbs.sh --force    # re-captures everything
+
+The slug rule in that script must stay in sync with `slugFor()` in
+`src/App.tsx`. A card whose image is missing falls back to a "no preview" tile.
