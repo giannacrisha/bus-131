@@ -9,7 +9,7 @@ function slugFor(url: string): string {
   return new URL(url).host.replace(/[^a-zA-Z0-9]/g, "-").replace(/-+$/, "")
 }
 
-function Thumb({ url, alt }: { url?: string alt: string }) {
+function Thumb({ url, alt }: { url?: string; alt: string }) {
   const [failed, setFailed] = useState(false)
 
   return (
