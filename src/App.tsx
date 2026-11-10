@@ -9,7 +9,59 @@ function slugFor(url: string): string {
   return new URL(url).host.replace(/[^a-zA-Z0-9]/g, "-").replace(/-+$/, "")
 }
 
-function Thumb({ url, alt }: { url?: string; alt: string }) {
+/** Deterministic hash so each project always gets the same tile colors. */
+function hashCode(s: string): number {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0
+  return Math.abs(h)
+}
+
+/**
+ * Generated stand-in shown until a real screenshot exists in public/thumbs.
+ * Colors derive from the host so every project looks distinct but stable.
+ */
+function GeneratedTile({
+  label,
+  host,
+}: {
+  label: string
+  host: string | null
+}) {
+  const h = hashCode(host ?? label)
+  const hue = h % 360
+  const hue2 = (hue + 35 + (h % 40)) % 360
+  const angle = 115 + (h % 110)
+
+  return (
+    <div
+      className="flex h-full w-full flex-col justify-between p-4 transition-transform duration-300 group-hover:scale-[1.03]"
+      style={{
+        background: `linear-gradient(${angle}deg, hsl(${hue} 42% 38%), hsl(${hue2} 48% 26%))`,
+      }}
+    >
+      <span className="line-clamp-2 text-left text-lg font-semibold leading-snug tracking-tight text-white/95">
+        {label}
+      </span>
+      {host && (
+        <span className="truncate text-left font-mono text-[11px] text-white/60">
+          {host}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function Thumb({
+  url,
+  alt,
+  label,
+  host,
+}: {
+  url?: string
+  alt: string
+  label: string
+  host: string | null
+}) {
   const [failed, setFailed] = useState(false)
 
   return (
@@ -23,6 +75,8 @@ function Thumb({ url, alt }: { url?: string; alt: string }) {
           onError={() => setFailed(true)}
           className="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
         />
+      ) : url ? (
+        <GeneratedTile label={label} host={host} />
       ) : (
         <div className="flex h-full w-full items-center justify-center font-mono text-xs text-[var(--muted)]">
           no preview
@@ -47,6 +101,8 @@ function EntryCard({
       <Thumb
         url={entry.url}
         alt={`Screenshot of ${entry.student}'s ${label}`}
+        label={label}
+        host={host}
       />
       <div className="px-2 pt-4">
         <div className="flex items-baseline justify-between gap-3">
