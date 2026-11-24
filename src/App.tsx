@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import AbVote from "./AbVote"
+import Present from "./Present"
 import { ACTIVITIES, COURSE, type Activity, type Entry } from "./data/showcase"
 
 /**
@@ -183,6 +185,16 @@ function Section({ activity }: { activity: Activity }) {
 }
 
 export default function App() {
+  const [presenting, setPresenting] = useState(() => location.hash === "#present")
+  useEffect(() => {
+    const onHash = () => setPresenting(location.hash === "#present")
+    window.addEventListener("hashchange", onHash)
+    return () => window.removeEventListener("hashchange", onHash)
+  }, [])
+  return presenting ? <Present /> : <Showcase />
+}
+
+function Showcase() {
   const [query, setQuery] = useState("")
 
   const sections = useMemo(() => {
@@ -214,6 +226,12 @@ export default function App() {
         </p>
 
         <nav className="mt-8 flex flex-wrap gap-2">
+          <a
+            href="#ab-mocks"
+            className="rounded-full bg-[var(--fg)] px-3 py-1 text-sm font-medium text-[var(--bg)]"
+          >
+            A/B Mocks · Vote
+          </a>
           {ACTIVITIES.map((a) => (
             <a
               key={a.id}
@@ -235,6 +253,7 @@ export default function App() {
       </header>
 
       <main className="mt-14 space-y-16">
+        {!query.trim() && <AbVote />}
         {sections.length === 0 ? (
           <p className="text-[var(--muted)]">No projects match “{query}”.</p>
         ) : (

@@ -54,3 +54,15 @@ Chrome + `sips`) into `public/thumbs/<host-slug>.jpg`. After adding entries:
 
 The slug rule in that script must stay in sync with `slugFor()` in
 `src/App.tsx`. A card whose image is missing falls back to a "no preview" tile.
+
+## Live A/B mock vote
+
+`src/AbVote.tsx` renders a live section fed by `worker/index.ts` (`/api/*`),
+which reads the Google Form response sheet (IDs in `wrangler.jsonc` vars) and
+stores ballots in a SQLite Durable Object. Results are hidden until the admin
+reveals them: open the site with `#admin`, set or enter the passcode, then use
+"Show results to everyone". The sheet must be shared as "Anyone with the link".
+
+`src/Present.tsx` (`/#present`) stitches every submission into one slideshow.
+Public Google Slides decks are proxied as PDF by `/api/deck` and drawn with
+pdf.js from cdnjs; non-public decks fall back to Google's embedded player.
