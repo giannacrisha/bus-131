@@ -62,3 +62,7 @@ which reads the Google Form response sheet (IDs in `wrangler.jsonc` vars) and
 stores ballots in a SQLite Durable Object. Results are hidden until the admin
 reveals them: open the site with `#admin`, set or enter the passcode, then use
 "Show results to everyone". The sheet must be shared as "Anyone with the link".
+
+`src/Present.tsx` (`/#present`) stitches every submission into one slideshow.
+Public Google Slides decks are proxied as PDF by `/api/deck` and drawn with
+pdf.js from cdnjs; non-public decks fall back to Google's embedded player.

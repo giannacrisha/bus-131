@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import AbVote from "./AbVote"
+import Present from "./Present"
 import { ACTIVITIES, COURSE, type Activity, type Entry } from "./data/showcase"
 
 /**
@@ -184,6 +185,16 @@ function Section({ activity }: { activity: Activity }) {
 }
 
 export default function App() {
+  const [presenting, setPresenting] = useState(() => location.hash === "#present")
+  useEffect(() => {
+    const onHash = () => setPresenting(location.hash === "#present")
+    window.addEventListener("hashchange", onHash)
+    return () => window.removeEventListener("hashchange", onHash)
+  }, [])
+  return presenting ? <Present /> : <Showcase />
+}
+
+function Showcase() {
   const [query, setQuery] = useState("")
 
   const sections = useMemo(() => {

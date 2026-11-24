@@ -31,6 +31,22 @@ export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url)
     if (!url.pathname.startsWith("/api/")) return new Response("Not found", { status: 404 })
+
+    // Presentation view: proxy a Google Slides deck as PDF (browsers can't
+    // fetch it cross-origin). Only works for decks shared "Anyone with the link".
+    if (url.pathname === "/api/deck") {
+      const id = url.searchParams.get("id") ?? ""
+      if (!/^[a-zA-Z0-9_-]{20,80}$/.test(id)) return new Response("Bad id", { status: 400 })
+      const res = await fetch(`https://docs.google.com/presentation/d/${id}/export/pdf`, {
+        cf: { cacheTtl: 60, cacheEverything: true },
+      } as RequestInit)
+      if (!res.ok || !res.headers.get("content-type")?.includes("pdf"))
+        return new Response("Deck not public", { status: 403 })
+      return new Response(res.body, {
+        headers: { "content-type": "application/pdf", "cache-control": "public, max-age=60" },
+      })
+    }
+
     const stub = env.VOTE.get(env.VOTE.idFromName("ab-mocks"))
     return stub.fetch(req)
   },

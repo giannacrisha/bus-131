@@ -127,6 +127,14 @@ export default function AbVote() {
         <span className="font-mono text-xs text-[var(--muted)]">
           {projects.length} submission{projects.length === 1 ? "" : "s"} · {state?.voters ?? 0} voted
         </span>
+        {projects.length > 0 && (
+          <a
+            href="#present"
+            className="ml-auto rounded-full border border-[var(--line)] px-3 py-1 text-sm hover:border-[var(--fg)]"
+          >
+            ▶ Present all
+          </a>
+        )}
       </div>
       <p className="mt-2 max-w-prose text-[var(--muted)]">
         Click through each team's slides, then pick your top three. You can change your picks
