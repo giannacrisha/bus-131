@@ -47,6 +47,20 @@ export default {
       })
     }
 
+    // Card thumbnail: first slide of a public Google Slides deck as PNG.
+    if (url.pathname === "/api/thumb") {
+      const id = url.searchParams.get("id") ?? ""
+      if (!/^[a-zA-Z0-9_-]{20,80}$/.test(id)) return new Response("Bad id", { status: 400 })
+      const res = await fetch(`https://docs.google.com/presentation/d/${id}/export/png`, {
+        cf: { cacheTtl: 300, cacheEverything: true },
+      } as RequestInit)
+      if (!res.ok || !res.headers.get("content-type")?.startsWith("image/"))
+        return new Response("No thumbnail", { status: 404 })
+      return new Response(res.body, {
+        headers: { "content-type": "image/png", "cache-control": "public, max-age=300" },
+      })
+    }
+
     const stub = env.VOTE.get(env.VOTE.idFromName("ab-mocks"))
     return stub.fetch(req)
   },

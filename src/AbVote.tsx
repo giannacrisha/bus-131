@@ -37,6 +37,7 @@ function voterId(): string {
 function describe(url: string): { kind: string; host: string } {
   try {
     const u = new URL(url)
+    if (u.host === "claude.ai") return { kind: "Claude artifact", host: u.host }
     if (u.host === "docs.google.com" && u.pathname.startsWith("/presentation"))
       return { kind: "Google Slides", host: u.host }
     if (u.host.endsWith("canva.com")) return { kind: "Canva", host: u.host }
@@ -196,8 +197,7 @@ export default function AbVote() {
           {projects.map((p) => {
             const picked = state!.mine.includes(p.id)
             const full = !picked && state!.mine.length >= MAX
-            const { kind, host } = describe(p.url)
-            const hue = (p.n * 47) % 360
+            const { kind } = describe(p.url)
             return (
               <div
                 key={p.id}
@@ -206,21 +206,13 @@ export default function AbVote() {
                 }`}
               >
                 <a href={p.url} target="_blank" rel="noreferrer" className="group block">
-                  <div
-                    className="flex aspect-[8/5] flex-col justify-between rounded-lg p-4 transition-transform duration-300 group-hover:scale-[1.02]"
-                    style={{
-                      background: `linear-gradient(135deg, hsl(${hue} 42% 38%), hsl(${(hue + 40) % 360} 48% 26%))`,
-                    }}
-                  >
-                    <span className="text-3xl font-semibold tracking-tight text-white/95">Mock {p.n}</span>
-                    <span className="flex items-center justify-between font-mono text-[11px] text-white/70">
-                      <span className="truncate">{kind}</span>
-                      <span aria-hidden>Open ↗</span>
-                    </span>
-                  </div>
+                  <CardThumb project={p} kind={kind} />
                 </a>
                 <div className="flex items-center justify-between gap-3 px-1 pt-3">
-                  <span className="truncate font-mono text-xs text-[var(--muted)]">{host}</span>
+                  <span className="min-w-0 truncate">
+                    <span className="font-medium">Mock {p.n}</span>
+                    <span className="ml-2 font-mono text-xs text-[var(--muted)]">{kind}</span>
+                  </span>
                   <button
                     onClick={() => toggle(p.id)}
                     disabled={full}
@@ -257,6 +249,37 @@ export default function AbVote() {
         </div>
       )}
     </section>
+  )
+}
+
+/** First slide of a public Google Slides deck, else a colored tile. */
+function CardThumb({ project: p, kind }: { project: Project; kind: string }) {
+  const sid = p.url.match(/docs\.google\.com\/presentation\/d\/([a-zA-Z0-9_-]{20,80})/)?.[1]
+  const [failed, setFailed] = useState(false)
+  const hue = (p.n * 47) % 360
+  return (
+    <div className="relative aspect-[8/5] overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--bg)]">
+      {sid && !failed ? (
+        <img
+          src={`/api/thumb?id=${sid}`}
+          alt={`First slide of Mock ${p.n}`}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+        />
+      ) : (
+        <div
+          className="flex h-full w-full flex-col justify-between p-4 transition-transform duration-300 group-hover:scale-[1.03]"
+          style={{ background: `linear-gradient(135deg, hsl(${hue} 42% 38%), hsl(${(hue + 40) % 360} 48% 26%))` }}
+        >
+          <span className="text-3xl font-semibold tracking-tight text-white/95">Mock {p.n}</span>
+          <span className="truncate font-mono text-[11px] text-white/70">{kind}</span>
+        </div>
+      )}
+      <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 font-mono text-[11px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+        Open ↗
+      </span>
+    </div>
   )
 }
 
