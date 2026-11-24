@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import AbVote from "./AbVote"
 import { ACTIVITIES, COURSE, type Activity, type Entry } from "./data/showcase"
 
 /**
@@ -214,6 +215,12 @@ export default function App() {
         </p>
 
         <nav className="mt-8 flex flex-wrap gap-2">
+          <a
+            href="#ab-mocks"
+            className="rounded-full bg-[var(--fg)] px-3 py-1 text-sm font-medium text-[var(--bg)]"
+          >
+            A/B Mocks · Vote
+          </a>
           {ACTIVITIES.map((a) => (
             <a
               key={a.id}
@@ -235,6 +242,7 @@ export default function App() {
       </header>
 
       <main className="mt-14 space-y-16">
+        {!query.trim() && <AbVote />}
         {sections.length === 0 ? (
           <p className="text-[var(--muted)]">No projects match “{query}”.</p>
         ) : (
